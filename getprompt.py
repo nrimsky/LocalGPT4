@@ -13,22 +13,32 @@ OPENCAGE_API_KEY = os.getenv("OPENCAGE_API_KEY")
 
 
 def fetch_weather_data(location):
-    lat, lon = location
-    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHERMAP_API_KEY}&units=metric"
-    response = requests.get(url)
-    data = response.json()
-    description = data.get("weather", [{}])[0].get("description", "Ordinary")
-    temperature = data.get("main", {}).get("temp", "Unknown")
-    return description, temperature
+    try:
+        lat, lon = location
+        url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHERMAP_API_KEY}&units=metric"
+        response = requests.get(url)
+        data = response.json()
+        description = data.get("weather", [{}])[0].get("description", "Ordinary")
+        temperature = data.get("main", {}).get("temp", "Unknown")
+        return description, temperature
+    except Exception as e:
+        print("Error calling", url, e)
+        return "Ordinary", "Unknown"
+
 
 
 def fetch_city_name(location):
-    lat, lon = location
-    url = f"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lon}&key={OPENCAGE_API_KEY}"
-    response = requests.get(url)
-    data = response.json()
-    city = data['results'][0]['components']['city']
-    return city
+    try:
+        lat, lon = location
+        url = f"https://api.opencagedata.com/geocode/v1/json?q={lat}+{lon}&key={OPENCAGE_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        city = data['results'][0]['components']['city']
+        return city
+    except Exception as e:
+        print("Error calling", url, e)
+        return "London"
+
 
 def fetch_local_news(city):
     url = f"https://newsapi.org/v2/everything?q={city}&apiKey={NEWS_API_KEY}"
@@ -41,37 +51,41 @@ def fetch_local_news(city):
 
 
 def fetch_venues(location):
-    interesting_queries = [
-        "museum",
-        "landmark",
-        "art gallery",
-        "theater",
-        "historical site",
-        "park",
-        "scenic viewpoint",
-        "monument",
-        "street art",
-        "live music",
-        "brewery",
-        "unique cafe",
-    ]
-    query = random.choice(interesting_queries)
+    try:
+        interesting_queries = [
+            "museum",
+            "landmark",
+            "art gallery",
+            "theater",
+            "historical site",
+            "park",
+            "scenic viewpoint",
+            "monument",
+            "street art",
+            "live music",
+            "brewery",
+            "unique cafe",
+        ]
+        query = random.choice(interesting_queries)
 
-    url = "https://api.foursquare.com/v3/places/search"
-    headers = {
-        "accept": "application/json",
-        "Authorization": f"{FOURSQUARE_API_KEY}",
-    }
-    params = {
-        "ll": f"{location[0]},{location[1]}",
-        "query": query,
-        "limit": 3,  # You can adjust the limit as needed
-    }
+        url = "https://api.foursquare.com/v3/places/search"
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"{FOURSQUARE_API_KEY}",
+        }
+        params = {
+            "ll": f"{location[0]},{location[1]}",
+            "query": query,
+            "limit": 3,  # You can adjust the limit as needed
+        }
 
-    response = requests.get(url, headers=headers, params=params)
-    venues = response.json()["results"]
+        response = requests.get(url, headers=headers, params=params)
+        venues = response.json()["results"]
 
-    return venues, query
+        return venues, query
+    except Exception as e:
+        print("Error calling", url, e)
+        return [], ""
 
 def fetch_wikipedia_data(location):
     latitude, longitude = location
@@ -95,7 +109,8 @@ def fetch_wikipedia_data(location):
         titles = [result["title"] for result in wikipedia_data["query"]["geosearch"]]
         return titles
     else:
-        raise Exception(f"Error fetching Wikipedia data: {response.status_code}")
+        print("fetching Wikipedia data", response.status_code)
+        return []
 
 def construct_llm_prompt(location, timezone):
     weather_description, temperature = fetch_weather_data(location)
