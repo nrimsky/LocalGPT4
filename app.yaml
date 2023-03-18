@@ -1,0 +1,15 @@
+runtime: python39
+
+entrypoint: gunicorn -b :$PORT app:app
+
+instance_class: F2
+
+env_variables:
+  GOOGLE_APPLICATION_CREDENTIALS: 'client_secret.json'
+
+handlers:
+- url: /static
+  static_dir: build/static
+
+- url: /.*
+  script: auto

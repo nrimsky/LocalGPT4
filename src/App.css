@@ -1,0 +1,51 @@
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #282c34;
+}
+
+.error-message {
+  color: red;
+}
+
+.App-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+button {
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  margin: 16px;
+  background-color: #2257db;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #0048ff;
+}
+
+button:active {
+  background-color: #2300ae;
+}
+
+audio {
+  margin-top: 24px;
+  width: 80%;
+  max-width: 480px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
