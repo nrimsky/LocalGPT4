@@ -48,10 +48,10 @@ def generate_openai_response(prompt):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=600,  # Adjust the length of the response as needed
+        max_tokens=400,  # Adjust the length of the response as needed
         n=1,
         stop="goodbye!",
-        temperature=0.8,
+        temperature=1,
     )
 
     generated_text = response.choices[0]["message"]["content"].strip() + " goodbye!"
