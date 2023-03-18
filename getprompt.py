@@ -17,7 +17,9 @@ def fetch_weather_data(location):
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHERMAP_API_KEY}&units=metric"
     response = requests.get(url)
     data = response.json()
-    return data["weather"][0]["description"], data["main"]["temp"]
+    description = data.get("weather", [{}])[0].get("description", "Ordinary")
+    temperature = data.get("main", {}).get("temp", "Unknown")
+    return description, temperature
 
 
 def fetch_city_name(location):
@@ -63,7 +65,7 @@ def fetch_venues(location):
     params = {
         "ll": f"{location[0]},{location[1]}",
         "query": query,
-        "limit": 6,  # You can adjust the limit as needed
+        "limit": 3,  # You can adjust the limit as needed
     }
 
     response = requests.get(url, headers=headers, params=params)
@@ -83,7 +85,7 @@ def fetch_wikipedia_data(location):
         "list": "geosearch",
         "gscoord": f"{latitude}|{longitude}",
         "gsradius": radius,
-        "gslimit": 6,  # Limit the number of results; adjust as needed.
+        "gslimit": 3,  # Limit the number of results; adjust as needed.
     }
 
     response = requests.get(wikipedia_api_url, params=params)

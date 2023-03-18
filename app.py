@@ -43,7 +43,7 @@ def generate_podcast():
 def generate_openai_response(prompt):
     # Make a request to the OpenAI API
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo", #gpt-4 if want GPT4
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
