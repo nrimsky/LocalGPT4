@@ -11,6 +11,11 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 FOURSQUARE_API_KEY = os.getenv("FOURSQUARE_API_KEY")
 OPENCAGE_API_KEY = os.getenv("OPENCAGE_API_KEY")
 
+def sample_items(items, sample_size):
+    actual_sample_size = min(sample_size, len(items))
+    sampled_items = random.sample(items, actual_sample_size)
+    return sampled_items
+
 
 def fetch_weather_data(location):
     try:
@@ -45,7 +50,7 @@ def fetch_local_news(city):
     response = requests.get(url)
     data = response.json()
     if data['status'] == 'ok':
-        return data['articles'][:3]
+        return sample_items(data['articles'], 3)
     else:
         return []
 
@@ -76,11 +81,12 @@ def fetch_venues(location):
         params = {
             "ll": f"{location[0]},{location[1]}",
             "query": query,
-            "limit": 3,  # You can adjust the limit as needed
+            "limit": 10,
         }
 
         response = requests.get(url, headers=headers, params=params)
         venues = response.json()["results"]
+        venues = sample_items(venues, 3)
 
         return venues, query
     except Exception as e:
@@ -99,7 +105,7 @@ def fetch_wikipedia_data(location):
         "list": "geosearch",
         "gscoord": f"{latitude}|{longitude}",
         "gsradius": radius,
-        "gslimit": 3,  # Limit the number of results; adjust as needed.
+        "gslimit": 10,  # Limit the number of results; adjust as needed.
     }
 
     response = requests.get(wikipedia_api_url, params=params)
@@ -107,6 +113,7 @@ def fetch_wikipedia_data(location):
     if response.status_code == 200:
         wikipedia_data = response.json()
         titles = [result["title"] for result in wikipedia_data["query"]["geosearch"]]
+        titles = sample_items(titles, 3)
         return titles
     else:
         print("fetching Wikipedia data", response.status_code)
