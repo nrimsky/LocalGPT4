@@ -7,7 +7,6 @@ import random
 
 load_dotenv()
 OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 FOURSQUARE_API_KEY = os.getenv("FOURSQUARE_API_KEY")
 OPENCAGE_API_KEY = os.getenv("OPENCAGE_API_KEY")
 
@@ -16,21 +15,18 @@ def sample_items(items, sample_size):
     sampled_items = random.sample(items, actual_sample_size)
     return sampled_items
 
-
 def fetch_weather_data(location):
     try:
         lat, lon = location
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHERMAP_API_KEY}&units=metric"
         response = requests.get(url)
         data = response.json()
-        description = data.get("weather", [{}])[0].get("description", "Ordinary")
+        description = data.get("weather", [{}])[0].get("description", "Unknown")
         temperature = data.get("main", {}).get("temp", "Unknown")
         return description, temperature
     except Exception as e:
         print("Error calling", url, e)
-        return "Ordinary", "Unknown"
-
-
+        return "Unknown", "Unknown"
 
 def fetch_city_name(location):
     try:
@@ -44,17 +40,6 @@ def fetch_city_name(location):
         print("Error calling", url, e)
         return "London"
 
-
-def fetch_local_news(city):
-    url = f"https://newsapi.org/v2/everything?q={city}&apiKey={NEWS_API_KEY}"
-    response = requests.get(url)
-    data = response.json()
-    if data['status'] == 'ok':
-        return sample_items(data['articles'], 3)
-    else:
-        return []
-
-
 def fetch_venues(location):
     try:
         interesting_queries = [
@@ -64,11 +49,9 @@ def fetch_venues(location):
             "theater",
             "historical site",
             "park",
-            "scenic viewpoint",
             "monument",
             "street art",
             "live music",
-            "brewery",
             "unique cafe",
         ]
         query = random.choice(interesting_queries)
@@ -86,7 +69,7 @@ def fetch_venues(location):
 
         response = requests.get(url, headers=headers, params=params)
         venues = response.json()["results"]
-        venues = sample_items(venues, 3)
+        venues = sample_items(venues, 4)
 
         return venues, query
     except Exception as e:
@@ -105,7 +88,7 @@ def fetch_wikipedia_data(location):
         "list": "geosearch",
         "gscoord": f"{latitude}|{longitude}",
         "gsradius": radius,
-        "gslimit": 10,  # Limit the number of results; adjust as needed.
+        "gslimit": 30,  # Limit the number of results; adjust as needed.
     }
 
     response = requests.get(wikipedia_api_url, params=params)
@@ -122,18 +105,14 @@ def fetch_wikipedia_data(location):
 def construct_llm_prompt(location, timezone):
     weather_description, temperature = fetch_weather_data(location)
     city = fetch_city_name(location)
-    local_news = fetch_local_news(city)
     venues, query = fetch_venues(location)
     wiki_data = fetch_wikipedia_data(location)
 
     now = datetime.now(pytz.timezone(timezone))
     local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    prompt = f"Here is some info on the local area.\nAt {local_time} in {city}, the weather is {weather_description} with a temperature of {temperature}°C.\nHere are some local news headlines:\n"
-    for article in local_news:
-        prompt += f"- {article['title']}\n"
+    prompt = f"Here is some info on the local area.\nAt {local_time} in {city}, the weather is {weather_description} with a temperature of {temperature}°C.\nSome Wikipedia pages concerning things nearby are:\n"
 
-    prompt += "Some interesting things nearby are:\n"
     for item in wiki_data:
         prompt += f"- {item}\n"
 
