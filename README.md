@@ -12,4 +12,5 @@ Web app that uses your current location and various APIs to generate a short uni
 
 - `python3 -m venv venv`
 - `source venv/bin/activate`
+- `pip install -r requirements.txt`
 - `gunicorn -b :8000 app:app --timeout 320 --log-level=debug`
